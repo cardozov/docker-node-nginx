@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  db:
+    container_name: db
+    image: mysql:latest
+    # command: --innodb-use-native-aio=0
+    # restart: always
+    # tty: true
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      # MYSQL_DATABASE: node
+      # MYSQL_USER: user
+      # MYSQL_PASSWORD: pass
+    networks:
+      - minharede
+
+  app1:
+    container_name: app1
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    command: dockerize -wait tcp://db:3306 -timeout 20s
+    volumes:
+      - ./node:/app
+    depends_on:
+      - db
+    networks:
+      - minharede
+  
+  app2:
+    container_name: app2
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    command: dockerize -wait tcp://db:3306 -timeout 20s
+    volumes:
+      - ./node:/app
+    depends_on:
+      - db
+    networks:
+      - minharede
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    ports:
+      - "8080:80"
+    depends_on:
+      - app1
+      - app2
+    networks:
+      - minharede
+    
+networks:
+  minharede:
+    driver: bridge
