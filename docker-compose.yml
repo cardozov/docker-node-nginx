@@ -4,16 +4,11 @@ services:
   db:
     container_name: db
     image: mysql:latest
-    # command: --innodb-use-native-aio=0
-    # restart: always
-    # tty: true
+    restart: always
     volumes:
-      - ./db:/var/lib/mysql
+      - ./db/dump:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: root
-      # MYSQL_DATABASE: node
-      # MYSQL_USER: user
-      # MYSQL_PASSWORD: pass
     networks:
       - minharede
 
@@ -24,14 +19,13 @@ services:
       dockerfile: Dockerfile
     restart: always
     tty: true
-    command: dockerize -wait tcp://db:3306 -timeout 20s
     volumes:
       - ./node:/app
     depends_on:
       - db
     networks:
       - minharede
-  
+
   app2:
     container_name: app2
     build:
@@ -39,7 +33,6 @@ services:
       dockerfile: Dockerfile
     restart: always
     tty: true
-    command: dockerize -wait tcp://db:3306 -timeout 20s
     volumes:
       - ./node:/app
     depends_on:
@@ -61,7 +54,7 @@ services:
       - app2
     networks:
       - minharede
-    
+
 networks:
   minharede:
     driver: bridge
