@@ -1,5 +1,5 @@
 # db volume
-db
+db/data
 
 # packages
 node_modules
